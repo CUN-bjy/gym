@@ -170,6 +170,27 @@ register(
 )
 
 register(
+    id="InvertedPendulum-v3",
+    entry_point="gym.envs.mujoco:InvertedPendulumEnv3",
+    max_episode_steps=1000,
+    reward_threshold=950.0,
+)
+
+register(
+    id="InvertedPendulum-v4",
+    entry_point="gym.envs.mujoco:InvertedPendulumEnv4",
+    max_episode_steps=1000,
+    reward_threshold=950.0,
+)
+
+register(
+    id="InvertedPendulum-v5",
+    entry_point="gym.envs.mujoco:InvertedPendulumEnv5",
+    max_episode_steps=1000,
+    reward_threshold=950.0,
+)
+
+register(
     id="InvertedDoublePendulum-v2",
     entry_point="gym.envs.mujoco:InvertedDoublePendulumEnv",
     max_episode_steps=1000,

@@ -17,7 +17,7 @@ class InvertedPendulumTargetEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         g = self._get_goal()
         notdone = np.isfinite(ob).all() and (np.abs(ob[1]) <= 1.5)
         done = not notdone
-        reward = -np.sum(np.abs(g - ob))
+        reward = -np.sum(np.abs(g - ob[:4]))
         
         if self.viewer:
             del self.viewer._markers[:]
@@ -34,9 +34,12 @@ class InvertedPendulumTargetEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.set_state(qpos, qvel)
         self._sample_goal()
         return self._get_obs()
+    
+    def get_spaces(self):
+        return self.observation_space, self.action_space
 
     def _get_obs(self):
-        return np.concatenate([self.sim.data.qpos, self.sim.data.qvel]).ravel()
+        return np.concatenate([self.sim.data.qpos, self.sim.data.qvel, self.tpos]).ravel()
 
     def _sample_goal(self):
         self.tpos = np.array([self.init_qpos[0] + self.np_random.uniform(low=-3.5, high=3.5), self.init_qpos[1]])

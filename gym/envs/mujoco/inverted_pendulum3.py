@@ -25,6 +25,9 @@ class InvertedPendulumEnv3(mujoco_env.MujocoEnv, utils.EzPickle):
         self.set_state(qpos, qvel)
         return self._get_obs()
 
+    def get_spaces(self):
+        return self.observation_space, self.action_space
+    
     def _get_obs(self):
         return np.concatenate([self.sim.data.qpos, self.sim.data.qvel]).ravel()
 

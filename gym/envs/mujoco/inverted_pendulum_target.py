@@ -3,17 +3,27 @@ from gym import utils
 from gym.envs.mujoco import mujoco_env
 
 
-class InvertedPendulumEnv5(mujoco_env.MujocoEnv, utils.EzPickle):
+class InvertedPendulumTargetEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
+        self.tpos=np.array([0,0])
+        self.tvel=np.array([0,0])
         utils.EzPickle.__init__(self)
         mujoco_env.MujocoEnv.__init__(self, "inverted_pendulum.xml", 2)
+               
 
     def step(self, a):
         self.do_simulation(a, self.frame_skip)
         ob = self._get_obs()
+        g = self._get_goal()
         notdone = np.isfinite(ob).all() and (np.abs(ob[1]) <= 1.5)
         done = not notdone
-        reward = -ob[1] if ob[1] < 0 else 0
+        reward = -np.sum(np.abs(g - ob))
+        
+        if self.viewer:
+            del self.viewer._markers[:]
+            self.viewer.add_marker(pos=np.concatenate([self.tpos,[0]]),
+                        rgba=np.array([1.0, 0.0, 0.0, 0.5]), label="g")
+        
         return ob, reward, done, {}
 
     def reset_model(self):
@@ -22,11 +32,19 @@ class InvertedPendulumEnv5(mujoco_env.MujocoEnv, utils.EzPickle):
             size=self.model.nv, low=-0.01, high=0.01
         )
         self.set_state(qpos, qvel)
+        self._sample_goal()
         return self._get_obs()
 
     def _get_obs(self):
         return np.concatenate([self.sim.data.qpos, self.sim.data.qvel]).ravel()
 
+    def _sample_goal(self):
+        self.tpos = np.array([self.init_qpos[0] + self.np_random.uniform(low=-3.5, high=3.5), self.init_qpos[1]])
+        self.tvel = self.init_qvel 
+        
+    def _get_goal(self):
+        return np.concatenate([self.tpos, self.tvel]).ravel()
+    
     def viewer_setup(self):
         v = self.viewer
         v.cam.trackbodyid = 0

@@ -14,7 +14,6 @@ class InvertedPendulumEnv4(mujoco_env.MujocoEnv, utils.EzPickle):
         notdone = np.isfinite(ob).all() and (np.abs(ob[1]) <= 1.5)
         done = not notdone
         reward = ob[1] if ob[1] > 0 else 0
-        self.last_obs = self._get_obs()
         return ob, reward, done, {}
 
     def reset_model(self):

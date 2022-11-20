@@ -8,6 +8,7 @@ from gym.envs.mujoco.hopper import HopperEnv
 from gym.envs.mujoco.walker2d import Walker2dEnv
 from gym.envs.mujoco.humanoid import HumanoidEnv
 from gym.envs.mujoco.inverted_pendulum import InvertedPendulumEnv
+from gym.envs.mujoco.inverted_pendulum_target import InvertedPendulumTargetEnv
 from gym.envs.mujoco.inverted_pendulum3 import InvertedPendulumEnv3
 from gym.envs.mujoco.inverted_pendulum4 import InvertedPendulumEnv4
 from gym.envs.mujoco.inverted_pendulum5 import InvertedPendulumEnv5

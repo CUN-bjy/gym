@@ -17,7 +17,7 @@ class InvertedPendulumTargetEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         g = self._get_goal()
         notdone = np.isfinite(ob).all() and (np.abs(ob[1]) <= 1.5)
         done = not notdone
-        reward = -np.sum(np.abs(g - ob[:4]))
+        reward = 0.5*(-np.abs(g[0]-ob[0])) + (10 if np.abs(g[:1]-ob[:1])<0.1 else 1)
         
         if self.viewer:
             del self.viewer._markers[:]

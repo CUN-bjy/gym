@@ -13,18 +13,22 @@ class InvertedPendulumTargetEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def step(self, a):
         self.do_simulation(a, self.frame_skip)
-        ob = self._get_obs()
-        g = self._get_goal()
+        obs = self._get_obs()
+        
+        ob = obs["observation"]
+        g = obs["desired_goal"]
+        is_succeeded = np.abs(g[:1]-ob[:1])<0.1
         notdone = np.isfinite(ob).all() and (np.abs(ob[1]) <= 1.5)
         done = not notdone
-        reward = 0.5*(-np.abs(g[0]-ob[0])) + (10 if np.abs(g[:1]-ob[:1])<0.1 else 1)
+        
+        reward = 0.5*(-np.abs(g[0]-ob[0])) + (10 if is_succeeded else 1)
         
         if self.viewer:
             del self.viewer._markers[:]
             self.viewer.add_marker(pos=np.concatenate([self.tpos,[0]]),
                         rgba=np.array([1.0, 0.0, 0.0, 0.5]), label="g")
         
-        return ob, reward, done, {}
+        return obs, reward, done, {"is_succeed": is_succeeded}
 
     def reset_model(self):
         qpos = np.array([self.init_qpos[0] + self.np_random.uniform(low=-3.5, high=3.5), self.init_qpos[1] + self.np_random.uniform(low=-0.6, high=0.6)])
@@ -39,14 +43,16 @@ class InvertedPendulumTargetEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return self.observation_space, self.action_space
 
     def _get_obs(self):
-        return np.concatenate([self.sim.data.qpos, self.sim.data.qvel, self.tpos]).ravel()
+        obs = np.concatenate([self.sim.data.qpos, self.sim.data.qvel]).ravel()
+        goal = np.concatenate([self.tpos, self.tvel]).ravel()
+        return {"observation": obs.copy(),
+                "achieved_goal": obs.copy(),
+                "desired_goal": goal.copy()}
 
     def _sample_goal(self):
         self.tpos = np.array([self.init_qpos[0] + self.np_random.uniform(low=-3.5, high=3.5), self.init_qpos[1]])
         self.tvel = self.init_qvel 
         
-    def _get_goal(self):
-        return np.concatenate([self.tpos, self.tvel]).ravel()
     
     def viewer_setup(self):
         v = self.viewer

@@ -27,8 +27,10 @@ class InvertedPendulumTargetEnv2(mujoco_env.MujocoEnv, utils.EzPickle):
             del self.viewer._markers[:]
             self.viewer.add_marker(pos=np.concatenate([self.tpos,[0]]),
                         rgba=np.array([1.0, 0.0, 0.0, 0.5]), label="g")
+            self.viewer.add_marker(pos=np.concatenate([ob[:2],[3]]),
+                        rgba=np.array([1.0, 0.0, 0.0, 0.0]), label=f"{g[0]-ob[0]:.2}, {g[1]-ob[1]:.2}")
             if is_succeeded:
-                self.viewer.add_marker(pos=np.concatenate([self.tpos,[1]]),
+                self.viewer.add_marker(pos=np.concatenate([self.tpos-0.1,[1]]),
                             rgba=np.array([0.0, 0.0, 0.0, 0.5]), label="[success]!!")
         
         return obs, reward, done, {"is_succeeded": is_succeeded}

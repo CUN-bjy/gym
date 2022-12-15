@@ -3,7 +3,7 @@ from gym import utils
 from gym.envs.mujoco import mujoco_env
 
 
-class InvertedPendulumTargetEnv2(mujoco_env.MujocoEnv, utils.EzPickle):
+class InvertedPendulumTargetEnv3(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
         self.tpos=np.array([0,0])
         self.tvel=np.array([0,0])
@@ -17,18 +17,16 @@ class InvertedPendulumTargetEnv2(mujoco_env.MujocoEnv, utils.EzPickle):
         
         ob = obs["observation"]
         g = obs["desired_goal"]
-        is_succeeded = (np.mean(np.abs(g[:2]-ob[:2])) < 0.005)
+        is_succeeded = (np.abs(g[2]-ob[2]) < 0.01)
         notdone = np.isfinite(ob).all() and (np.abs(ob[1]) <= 1.5)
         done = not notdone
         
-        reward = 0.5*(-np.abs(g[0]-ob[0])) + (20 if is_succeeded else 1)
+        reward = (20 if is_succeeded else 1)
         
         if self.viewer:
             del self.viewer._markers[:]
-            self.viewer.add_marker(pos=np.concatenate([self.tpos,[0]]),
-                        rgba=np.array([1.0, 0.0, 0.0, 0.5]), label="g")
             self.viewer.add_marker(pos=np.concatenate([ob[:2],[3]]),
-                        rgba=np.array([1.0, 0.0, 0.0, 0.0]), label=f"{g[0]-ob[0]:.2}, {g[1]-ob[1]:.2}")
+                        rgba=np.array([1.0, 0.0, 0.0, 0.0]), label=f"target:{g[2]}, current:{ob[2]}, error:{g[2]-ob[2]}")
             if is_succeeded:
                 self.viewer.add_marker(pos=np.concatenate([self.tpos-0.1,[1]]),
                             rgba=np.array([0.0, 0.0, 0.0, 0.5]), label="[success]!!")
@@ -36,7 +34,7 @@ class InvertedPendulumTargetEnv2(mujoco_env.MujocoEnv, utils.EzPickle):
         return obs, reward, done, {"is_succeeded": is_succeeded}
 
     def reset_model(self):
-        qpos = np.array([self.init_qpos[0] + self.np_random.uniform(low=-3.5, high=3.5), 
+        qpos = np.array([self.init_qpos[0] + self.np_random.uniform(low=-4.5, high=-4.0), 
                          self.init_qpos[1] + self.np_random.uniform(low=-0.6, high=0.6)])
         qvel = self.init_qvel + self.np_random.uniform(
             size=self.model.nv, low=-0.01, high=0.01
@@ -56,8 +54,8 @@ class InvertedPendulumTargetEnv2(mujoco_env.MujocoEnv, utils.EzPickle):
                 "desired_goal": goal.copy()}
 
     def _sample_goal(self):
-        self.tpos = np.array([self.init_qpos[0] + self.np_random.uniform(low=-3.5, high=3.5), self.init_qpos[1]])
-        self.tvel = self.init_qvel 
+        self.tpos = np.array([self.init_qpos[0], self.init_qpos[1]])
+        self.tvel = np.array([self.init_qvel[0] + self.np_random.uniform(low=0.1, high=1), self.init_qvel[1]])
         
     
     def viewer_setup(self):

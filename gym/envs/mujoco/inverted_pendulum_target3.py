@@ -25,11 +25,11 @@ class InvertedPendulumTargetEnv3(mujoco_env.MujocoEnv, utils.EzPickle):
         
         if self.viewer:
             del self.viewer._markers[:]
-            self.viewer.add_marker(pos=np.concatenate([ob[:2],[3]]),
-                        rgba=np.array([1.0, 0.0, 0.0, 0.0]), label=f"target:{g[2]}, current:{ob[2]}, error:{g[2]-ob[2]}")
+            self.viewer.add_marker(pos=np.array([ob[0],0,2]),
+                        rgba=np.array([1.0, 0.0, 0.0, 0.0]), label=f"t:{g[2]:.2}, c:{ob[2]:.2}, t-c:{g[2]-ob[2]:.2}")
             if is_succeeded:
-                self.viewer.add_marker(pos=np.concatenate([self.tpos-0.1,[1]]),
-                            rgba=np.array([0.0, 0.0, 0.0, 0.5]), label="[success]!!")
+                self.viewer.add_marker(pos=np.array([ob[0],0,1]),
+                            rgba=np.array([0.0, 0.0, 0.0, 0.0]), label="[success]!!")
         
         return obs, reward, done, {"is_succeeded": is_succeeded}
 
@@ -55,10 +55,14 @@ class InvertedPendulumTargetEnv3(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def _sample_goal(self):
         self.tpos = np.array([self.init_qpos[0], self.init_qpos[1]])
-        self.tvel = np.array([self.init_qvel[0] + self.np_random.uniform(low=0.1, high=1), self.init_qvel[1]])
+        self.tvel = np.array([self.init_qvel[0] + self.np_random.uniform(low=0.05, high=0.5), self.init_qvel[1]])
         
     
     def viewer_setup(self):
         v = self.viewer
-        v.cam.trackbodyid = 0
+        v.cam.trackbodyid = -1
+        v.cam.lookat[0] = 0
+        v.cam.lookat[1] = 0
+        v.cam.lookat[1] = 0
+                
         v.cam.distance = self.model.stat.extent*1.5
